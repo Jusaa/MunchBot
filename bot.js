@@ -17,111 +17,99 @@ client.on("message", (message) => {
         if(message.author.bot) return;
 
 	// Get command and its arguments
-        const args = message.content.slice(1).trim().split(" ");
-        const command = args.shift().toLowerCase();
+	if(message.content.substring(0, 1) == "!"){
+	        const args = message.content.slice(1).trim().split(" ");
+        	const command = args.shift().toLowerCase();
 
-	// Creating a raid
-	if(command === "r"){
-                const boss = args[0];
-                const time = args[1];
-                let gym = "";
-                let i;
-                for(i = 2; i < args.length; i++){
-                        gym = gym + args[i] + " ";
-                }
-                const msg = "```Boss: " + boss + "\nTime: " + time + "\nLocation: " + gym + "\n-------------------------\nIlmoittautuneet: \nYhteensä: 0```";
-                message.delete().catch(O_o=>{});
-                message.channel.send(msg)
-			.then(function(message){
-	                        message.react(reaction_numbers[1]);
-	                        message.react(reaction_numbers[2]);
-	                        message.react(reaction_numbers[3]);
-			});
+		// Creating a raid
+		if(command === "r"){
+	                const boss = args[0];
+       	        	const time = args[1];
+                	let gym = "";
+                	let i;
+                	for(i = 2; i < args.length; i++){
+                	        gym = gym + args[i] + " ";
+                	}
+                	const msg = "```Boss: " + boss + "\nTime: " + time + "\nLocation: " + gym + "\n-------------------------\nIlmoittautuneet: \nYhteensä: 0```";
+                	message.delete().catch(O_o=>{});
+                	message.channel.send(msg)
+				.then(function(message){
+	        	                message.react(reaction_numbers[1]);
+	        	                message.react(reaction_numbers[2]);
+	        	                message.react(reaction_numbers[3]);
+				});
+		}
+
+		// PingPong!
+        	if (command === "ping") {
+        	        message.channel.send("pong!`" + (new Date().getTime() - message.createdTimestamp) + "ms`");
+        	}
 	}
-
-	// PingPong!
-        if (command === "ping") {
-                message.channel.send("pong!`" + (new Date().getTime() - message.createdTimestamp) + "ms`");
-        }
 });
 
-client.on("messageReactionAdd", (reaction, user) => {
-
+function editMessage(reaction, user) {
 	if(user.bot) return;
-	if(reaction.message.author.id !== "437713794576285696") return;
-	let newMessageContent = "";
-	let msgParts = reaction.message.content.split("Ilmoittautuneet:");
-
-	// -6, so we don't count bot's own reactions!
-	let playerCount = -6;
-	let users = new Map();
-
-	for (var [key, value] of reaction.message.reactions) {
-		if(key === reaction_numbers[3]){
-			playerCount += value.count * 3;
-		} else if(key === reaction_numbers[2]){
-			playerCount += value.count * 2;
-		} else if(key === reaction_numbers[1]){
-			playerCount += value.count;
-		}
-
-		for (var [ukey, uvalue] of value.users) {
-			if(!users.has(ukey)){
-				users.set(ukey, uvalue)
-			}
-		}
-	}
-
-	let usernamelist = "";
-	for (var [key, value] of users) {
-		if(key !== "437713794576285696") {
-			usernamelist += value.username + "\n";
-		}
-	}
-	newMessageContent = msgParts[0] + "Ilmoittautuneet:\n" + usernamelist + "\nYhteensä: " + playerCount + "```";
-
-	reaction.message.edit(newMessageContent);
-
-});
-
-client.on("messageReactionRemove", (reaction, user) => {
-
-        if(user.bot) return;
-
+        if(reaction.message.author.id !== "437713794576285696") return;
         let newMessageContent = "";
         let msgParts = reaction.message.content.split("Ilmoittautuneet:");
 
-	// -6, so we don't count bot's own reactions!
+        // -6, so we don't count bot's own reactions!
         let playerCount = -6;
-	let users = new Map();
+        let users = new Map();
 
-	for (var [key, value] of reaction.message.reactions) {
-		if(key === reaction_numbers[3]){
-			playerCount += value.count * 3;
-		} else if(key === reaction_numbers[2]){
-			playerCount += value.count * 2;
-		} else if(key === reaction_numbers[1]){
-			playerCount += value.count;
-		}
+        for (var [key, value] of reaction.message.reactions) {
+                if(key === reaction_numbers[3]){
+                        for(var [ukey, uvalue] of value.users){
+                               	if(!users.has(uvalue.username)){
+                                        users.set(uvalue.username, 2);
+                                }else{
+                                      	users.set(uvalue.username, users.get(uvalue.username) + 3);
+                                }
+                         }
+                        playerCount += value.count * 3;
+                } else if(key === reaction_numbers[2]){
+                        for(var [ukey, uvalue] of value.users){
+                                if(!users.has(uvalue.username)){
+                                        users.set(uvalue.username, 1);
+                                }else{
+                                      	users.set(uvalue.username, users.get(uvalue.username) + 2);
+                                }
+                         }
+                        playerCount += value.count * 2;
+                } else if(key === reaction_numbers[1]){
+                        for(var [ukey, uvalue] of value.users){
+                                if(!users.has(uvalue.username)){
+                                        users.set(uvalue.username, 0);
+                                }else{
+                                      	users.set(uvalue.username, users.get(uvalue.username) + 1);
+                                }
+                         }
+                        playerCount += value.count;
+                }
+        }
 
-		for (var [ukey, uvalue] of value.users) {
-			if(!users.has(ukey)){
-				users.set(ukey, uvalue);
-			}
-		}
-	}
-	let usernamelist = "";
-	for (var [key, value] of users) {
-		if(key !== "437713794576285696") {
-			usernamelist += value.username + "\n";
-		}
-	}
+        let usernamelist = "";
+        for (var [key, value] of users) {
+                if(key !== "Raidbot") {
+                        if(value != 0){
+                                usernamelist += key + " +" + value + "\n";
+                        }else{
+                              	usernamelist += key + "\n";
+                        }
+                }
+        }
 	newMessageContent = msgParts[0] + "Ilmoittautuneet:\n" + usernamelist + "\nYhteensä: " + playerCount + "```";
 
-	reaction.message.edit(newMessageContent);
+        reaction.message.edit(newMessageContent);
 
+}
+
+client.on("messageReactionAdd", (reaction, user) => {
+	editMessage(reaction, user);
 });
 
-
+client.on("messageReactionRemove", (reaction, user) => {
+	editMessage(reaction, user);
+});
 
 client.login(auth.token);
