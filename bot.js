@@ -2,12 +2,12 @@ const Discord = require("discord.js");
 const auth = require("./auth.json");
 
 const client = new Discord.Client();
-
 // Reaction numbers as Unicode, reacting with them normally doesn't work
 var reaction_numbers = ["\u0030\u20E3","\u0031\u20E3","\u0032\u20E3","\u0033\u20E3","\u0034\u20E3","\u0035\u20E3", "\u0036\u20E3","\u0037\u20E3","\u0038\u20E3","\u0039\u20E3"];
 
 client.on("ready", () => {
-       console.log("I am ready!");
+	console.log("I am ready!");
+	client.user.setUsername("MunchBot");
 });
 
 // Triggered when message is sent in server
@@ -22,7 +22,7 @@ client.on("message", (message) => {
         	const command = args.shift().toLowerCase();
 
 		// Creating a raid
-		if(command === "r"){
+		if(command === "tr"){
 	                const boss = args[0];
        	        	const time = args[1];
                 	let gym = "";
@@ -34,9 +34,9 @@ client.on("message", (message) => {
                 	message.delete().catch(O_o=>{});
                 	message.channel.send(msg)
 				.then(function(message){
-	        	                message.react(reaction_numbers[1]);
-	        	                message.react(reaction_numbers[2]);
-	        	                message.react(reaction_numbers[3]);
+	        	                message.react("438598806825861131" /*reaction_numbers[1]*/);
+	        	                message.react("438599265283997706" /*reaction_numbers[2]*/);
+	        	                message.react("438599716863868928" /*reaction_numbers[3]*/);
 				});
 		}
 
@@ -48,8 +48,10 @@ client.on("message", (message) => {
 });
 
 function editMessage(reaction, user) {
+
 	if(user.bot) return;
         if(reaction.message.author.id !== "437713794576285696") return;
+
         let newMessageContent = "";
         let msgParts = reaction.message.content.split("Ilmoittautuneet:");
 
@@ -58,7 +60,8 @@ function editMessage(reaction, user) {
         let users = new Map();
 
         for (var [key, value] of reaction.message.reactions) {
-                if(key === reaction_numbers[3]){
+		console.log(key);
+                if(key === "3_:438599716863868928" /*reaction_numbers[3]*/){
                         for(var [ukey, uvalue] of value.users){
                                	if(!users.has(uvalue.username)){
                                         users.set(uvalue.username, 2);
@@ -67,7 +70,7 @@ function editMessage(reaction, user) {
                                 }
                          }
                         playerCount += value.count * 3;
-                } else if(key === reaction_numbers[2]){
+                } else if(key === "2_:438599265283997706" /*reaction_numbers[2]*/){
                         for(var [ukey, uvalue] of value.users){
                                 if(!users.has(uvalue.username)){
                                         users.set(uvalue.username, 1);
@@ -76,7 +79,7 @@ function editMessage(reaction, user) {
                                 }
                          }
                         playerCount += value.count * 2;
-                } else if(key === reaction_numbers[1]){
+                } else if(key === "1_:438598806825861131" /*reaction_numbers[1]*/){
                         for(var [ukey, uvalue] of value.users){
                                 if(!users.has(uvalue.username)){
                                         users.set(uvalue.username, 0);
@@ -90,11 +93,11 @@ function editMessage(reaction, user) {
 
         let usernamelist = "";
         for (var [key, value] of users) {
-                if(key !== "Raidbot") {
+                if(key !== "MunchBot") {
                         if(value != 0){
-                                usernamelist += key + " +" + value + "\n";
+                                usernamelist += "(" + (value + 1) + ") " + key + " +" + value + "\n";
                         }else{
-                              	usernamelist += key + "\n";
+                              	usernamelist += "(" + (value + 1) + ") " + key + "\n";
                         }
                 }
         }
