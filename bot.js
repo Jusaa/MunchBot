@@ -1,7 +1,8 @@
 const Discord = require("discord.js");
 const auth = require("./auth.json");
-
 const client = new Discord.Client();
+const strsplit = require('strsplit')
+
 // Reaction numbers as Unicode, reacting with them normally doesn't work
 var reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
 
@@ -17,35 +18,21 @@ client.on("message", (message) => {
     if (message.author.bot) return;
 
     // Get command and its arguments
-    if (message.content.substring(0, 1) == "!") {
-        const args = message.content.slice(1).trim().split(" ");
-        const command = args.shift().toLowerCase();
+    if (message.content.startsWith('!')) {
 
-        const cmd = parseCommand(message.content)
+        let command = parseCommand(message.content)
+
+        console.log('MunchBot received command: ' + command)
 
         // Creating a raid
         if (command === "tr") {
-            // test
 
+            let raid = parseRaid(message.content)
+            let msg = raidToMessage(raid)
 
-            console.log('COMMAND: ' + cmd)
-            raid = parseRaid(message.content)
-            console.log(raid)
-            msg2 = raidToMessage(raid)
-            console.log(msg2)
-
-
-            const boss = args[0];
-            const time = args[1];
-            let gym = "";
-            let i;
-            for (i = 2; i < args.length; i++) {
-                gym = gym + args[i] + " ";
-            }
-            const msg = "```Boss: " + boss + "\nTime: " + time + "\nLocation: " + gym + "\n-------------------------\nIlmoittautuneet: \nYhteensä: 0```";
             message.delete().catch(O_o=> {
             });
-            message.channel.send(msg2)
+            message.channel.send(msg)
                 .then(function (message) {
                     message.react(/* "438598806825861131" */ reaction_numbers[1]);
                     message.react(/* "438599265283997706" */ reaction_numbers[2]);
@@ -63,10 +50,10 @@ client.on("message", (message) => {
 function editMessage(reaction, user) {
 
     if (user.bot) return;
-    if (reaction.message.author.id !== "437713794576285696") return;
+    if (reaction.message.author.id !== client.user.id) return;
 
     let newMessageContent = "";
-    let msgParts = reaction.message.content.split("Ilmoittautuneet:");
+    let msgParts = reaction.message.content.split("Trainers:");
 
     // -6, so we don't count bot's own reactions!
     let playerCount = -6;
@@ -74,7 +61,7 @@ function editMessage(reaction, user) {
 
     for (var [key, value] of reaction.message.reactions) {
         console.log(key);
-        if (key === "3_:438599716863868928" /*reaction_numbers[3]*/) {
+        if (key === /* "3_:438599716863868928" */ reaction_numbers[3]) {
             for (var [ukey, uvalue] of value.users) {
                 if (!users.has(uvalue.username)) {
                     users.set(uvalue.username, 2);
@@ -83,7 +70,7 @@ function editMessage(reaction, user) {
                 }
             }
             playerCount += value.count * 3;
-        } else if (key === "2_:438599265283997706" /*reaction_numbers[2]*/) {
+        } else if (key === /* "2_:438599265283997706" */ reaction_numbers[2]) {
             for (var [ukey, uvalue] of value.users) {
                 if (!users.has(uvalue.username)) {
                     users.set(uvalue.username, 1);
@@ -92,7 +79,7 @@ function editMessage(reaction, user) {
                 }
             }
             playerCount += value.count * 2;
-        } else if (key === "1_:438598806825861131" /*reaction_numbers[1]*/) {
+        } else if (key === /* "1_:438598806825861131" */ reaction_numbers[1]) {
             for (var [ukey, uvalue] of value.users) {
                 if (!users.has(uvalue.username)) {
                     users.set(uvalue.username, 0);
@@ -114,7 +101,7 @@ function editMessage(reaction, user) {
             }
         }
     }
-    newMessageContent = msgParts[0] + "Ilmoittautuneet:\n" + usernamelist + "\nYhteensä: " + playerCount + "```";
+    newMessageContent = msgParts[0] + "Trainers:\n" + usernamelist + "\nYhteensä: " + playerCount + "```";
 
     reaction.message.edit(newMessageContent);
 
@@ -138,14 +125,14 @@ function parseCommand(commandLine) {
         return commandLine.substring(1)
     }
     // possible parameters are ignored
-    return commandLine.substr(1, commandLine.indexOf(' '))
+    return commandLine.substr(1, commandLine.indexOf(' ') - 1)
 }
 
 function parseRaid(commandLine) {
     // format is: <command> <boss> <time> <gym>
     // gym name may contain spaces
     console.log(commandLine)
-    parts = commandLine.split(' ', 4)
+    parts = strsplit(commandLine, ' ', 4)
     console.log(parts.length)
     if (parts.length < 4) {
         throw('invalid raid format')
