@@ -1,9 +1,11 @@
 const Discord = require("discord.js");
 const auth = require("./auth.json");
+const dateDifference = require("date-difference");
 
 const client = new Discord.Client();
 // Reaction numbers as Unicode, reacting with them normally doesn't work
 var reaction_numbers = ["\u0030\u20E3","\u0031\u20E3","\u0032\u20E3","\u0033\u20E3","\u0034\u20E3","\u0035\u20E3", "\u0036\u20E3","\u0037\u20E3","\u0038\u20E3","\u0039\u20E3"];
+const startTime = new Date();
 
 client.on("ready", () => {
 	console.log("I am ready!");
@@ -44,6 +46,10 @@ client.on("message", (message) => {
         	if (command === "ping") {
         	        message.channel.send("pong!`" + (new Date().getTime() - message.createdTimestamp) + "ms`");
         	}
+
+        if (command === "info") {
+            message.channel.send("Munchbot uptime " + dateDifference(startTime, new Date()));
+        }
 	}
 });
 
