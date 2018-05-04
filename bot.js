@@ -23,6 +23,19 @@ client.on("message", (message) => {
 
 		// Creating a raid
 		if(command === "tr"){
+            // test
+            /*
+            try {
+                cmd = parseCommand(message.content)
+                console.log('COMMAND: ' + cmd)
+                raid = parseRaid(message.content)
+                console.log(raid)
+                msg2 = raidToMessage(raid)
+                console.log(msg2)
+            } catch (e) {
+                console.log(e)
+            }
+            */
 	                const boss = args[0];
        	        	const time = args[1];
                 	let gym = "";
@@ -114,5 +127,49 @@ client.on("messageReactionAdd", (reaction, user) => {
 client.on("messageReactionRemove", (reaction, user) => {
 	editMessage(reaction, user);
 });
+
+function parseCommand(commandLine) {
+    // all commands must start with character '!'
+    if (!commandLine.startsWith('!')) {
+        return undefined
+    }
+    // command may have no parameters
+    if (commandLine.indexOf(' ') === -1) {
+        return commandLine.substring(1)
+    }
+    // possible parameters are ignored
+    return commandLine.substr(1, commandLine.indexOf(' '))
+}
+
+function parseRaid(commandLine) {
+    // format is: <command> <boss> <time> <gym>
+    // gym name may contain spaces
+    console.log(commandLine)
+    parts = commandLine.split(' ', 4)
+    console.log(parts.length)
+    if (parts.length < 4) {
+        throw('invalid raid format')
+    }
+    return {
+        boss: parts[1],
+        time: parts[2],
+        gym: parts[3],
+        users: {}
+    }
+}
+
+function messageToRaid(message) {
+
+}
+function raidToMessage(raid) {
+    msg = '```'
+    msg += 'Boss: ' + raid.boss + '\n'
+    msg += 'Time: *' + raid.time + '*\n'
+    msg += 'Location: ' + raid.location + '\n'
+    msg += 'Trainers: ' + JSON.stringify(raid.users) + '\n'
+    msg = '```'
+    return msg
+}
+
 
 client.login(auth.token);
