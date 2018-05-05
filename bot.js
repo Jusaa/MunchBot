@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const auth = require("./auth.json");
 const client = new Discord.Client();
-const strsplit = require('strsplit')
+const parsers = require('./parsers.js')
 
 // Reaction numbers as Unicode, reacting with them normally doesn't work
 var reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
@@ -20,15 +20,15 @@ client.on("message", (message) => {
     // Get command and its arguments
     if (message.content.startsWith('!')) {
 
-        let command = parseCommand(message.content)
+        let command = parsers.parseCommand(message.content)
 
         console.log('MunchBot received command: ' + command)
 
         // Creating a raid
         if (command === "tr") {
 
-            let raid = parseRaid(message.content)
-            let msg = raidToMessage(raid)
+            let raid = parsers.parseRaid(message.content)
+            let msg = parsers.raidToMessage(raid)
 
             message.delete().catch(O_o=> {
             });
@@ -46,6 +46,51 @@ client.on("message", (message) => {
         }
     }
 });
+
+function addTrainer(reaction, user) {
+
+    if (user.bot) return
+    if (reaction.message.author.id !== client.user.id) return
+
+    let raid = parsers.messageToRaid(reaction.message)
+    let trainer = getNick(reaction, user)
+
+    raid.trainers.push(trainer)
+
+    let message = parsers.raidToMessage(raid)
+
+    reaction.message.edit(message)
+
+}
+
+function removeTrainer(reaction, user) {
+
+    if (user.bot) return
+    if (reaction.message.author.id !== client.user.id) return
+
+    let raid = parsers.messageToRaid(reaction.message)
+    let trainer = getNick(reaction, user)
+
+    raid.trainers.splice(raid.trainers.indexOf(trainer), 1)
+
+    let message = parsers.raidToMessage(raid)
+
+    reaction.message.edit(message)
+
+}
+
+function getCount(reaction) {
+    return (reaction_numbers.indexOf(reaction.emoji.name))
+}
+
+function getNick(reaction, user) {
+    let trainer = user.username
+    const friends = getCount(reaction) - 1
+    if (friends > 0) {
+        trainer += ' +' + friends
+    }
+    return trainer
+}
 
 function editMessage(reaction, user) {
 
@@ -108,43 +153,13 @@ function editMessage(reaction, user) {
 }
 
 client.on("messageReactionAdd", (reaction, user) => {
-    editMessage(reaction, user);
+    //editMessage(reaction, user);
+    addTrainer(reaction, user)
 });
 
 client.on("messageReactionRemove", (reaction, user) => {
-    editMessage(reaction, user);
+    //editMessage(reaction, user);
+    removeTrainer(reaction, user)
 });
-
-function parseCommand(commandLine) {
-    // all commands must start with character '!'
-    if (!commandLine.startsWith('!')) {
-        return undefined
-    }
-    // command may have no parameters
-    if (commandLine.indexOf(' ') === -1) {
-        return commandLine.substring(1)
-    }
-    // possible parameters are ignored
-    return commandLine.substr(1, commandLine.indexOf(' ') - 1)
-}
-
-function parseRaid(commandLine) {
-    // format is: <command> <boss> <time> <gym>
-    // gym name may contain spaces
-    let parts = strsplit(commandLine, ' ', 4)
-    if (parts.length < 4) {
-        throw('invalid raid format')
-    }
-    return {
-        boss: parts[1],
-        time: parts[2],
-        gym: parts[3],
-        trainers: []
-    }
-}
-
-
-
-
 
 client.login(auth.token);
