@@ -131,9 +131,7 @@ function parseCommand(commandLine) {
 function parseRaid(commandLine) {
     // format is: <command> <boss> <time> <gym>
     // gym name may contain spaces
-    console.log(commandLine)
-    parts = strsplit(commandLine, ' ', 4)
-    console.log(parts.length)
+    let parts = strsplit(commandLine, ' ', 4)
     if (parts.length < 4) {
         throw('invalid raid format')
     }
@@ -141,28 +139,12 @@ function parseRaid(commandLine) {
         boss: parts[1],
         time: parts[2],
         gym: parts[3],
-        users: []
+        trainers: []
     }
 }
 
-function messageToRaid(message) {
 
-}
-function raidToMessage(raid) {
-    msg = '```' +
-        'Boss: ' + raid.boss + '\n' +
-        'Time: ' + raid.time + '\n' +
-        'Location: ' + raid.gym + '\n' +
-        'Trainers: ' + formatTrainerList(raid.users) + '\n' +
-        '```'
-    return msg
-}
 
-function formatTrainerList(users) {
-    if (users.length == 0) {
-        return "none"
-    }
-    return users.sort().join(', ') + '\nTOTAL: ' + users.length
-}
+
 
 client.login(auth.token);
