@@ -47,10 +47,7 @@ client.on("message", (message) => {
     }
 });
 
-function addTrainer(reaction, user) {
-
-    if (user.bot) return
-    if (reaction.message.author.id !== client.user.id) return
+function addTrainerToRaid (reaction, user) {
 
     let raid = parsers.messageToRaid(reaction.message)
     let trainer = getNick(reaction, user)
@@ -63,10 +60,7 @@ function addTrainer(reaction, user) {
 
 }
 
-function removeTrainer(reaction, user) {
-
-    if (user.bot) return
-    if (reaction.message.author.id !== client.user.id) return
+function removeTrainerFromRaid (reaction, user) {
 
     let raid = parsers.messageToRaid(reaction.message)
     let trainer = getNick(reaction, user)
@@ -79,87 +73,47 @@ function removeTrainer(reaction, user) {
 
 }
 
-function getCount(reaction) {
+function getCount (reaction) {
     return (reaction_numbers.indexOf(reaction.emoji.name))
 }
 
-function getNick(reaction, user) {
+// Displays trainer name and possible friends in "+2" style
+function getNick (reaction, user) {
+
     let trainer = user.username
-    const friends = getCount(reaction) - 1
+    const friends = getCount(reaction) - 1 // user is included in the count
     if (friends > 0) {
         trainer += ' +' + friends
     }
     return trainer
 }
 
-function editMessage(reaction, user) {
-
-    if (user.bot) return;
-    if (reaction.message.author.id !== client.user.id) return;
-
-    let newMessageContent = "";
-    let msgParts = reaction.message.content.split("Trainers:");
-
-    // -6, so we don't count bot's own reactions!
-    let playerCount = -6;
-    let users = new Map();
-
-    for (var [key, value] of reaction.message.reactions) {
-        console.log(key);
-        if (key === /* "3_:438599716863868928" */ reaction_numbers[3]) {
-            for (var [ukey, uvalue] of value.users) {
-                if (!users.has(uvalue.username)) {
-                    users.set(uvalue.username, 2);
-                } else {
-                    users.set(uvalue.username, users.get(uvalue.username) + 3);
-                }
-            }
-            playerCount += value.count * 3;
-        } else if (key === /* "2_:438599265283997706" */ reaction_numbers[2]) {
-            for (var [ukey, uvalue] of value.users) {
-                if (!users.has(uvalue.username)) {
-                    users.set(uvalue.username, 1);
-                } else {
-                    users.set(uvalue.username, users.get(uvalue.username) + 2);
-                }
-            }
-            playerCount += value.count * 2;
-        } else if (key === /* "1_:438598806825861131" */ reaction_numbers[1]) {
-            for (var [ukey, uvalue] of value.users) {
-                if (!users.has(uvalue.username)) {
-                    users.set(uvalue.username, 0);
-                } else {
-                    users.set(uvalue.username, users.get(uvalue.username) + 1);
-                }
-            }
-            playerCount += value.count;
-        }
-    }
-
-    let usernamelist = "";
-    for (var [key, value] of users) {
-        if (key !== "MunchBot") {
-            if (value != 0) {
-                usernamelist += "(" + (value + 1) + ") " + key + " +" + value + "\n";
-            } else {
-                usernamelist += "(" + (value + 1) + ") " + key + "\n";
-            }
-        }
-    }
-    newMessageContent = msgParts[0] + "Trainers:\n" + usernamelist + "\nYhteensä: " + playerCount + "```";
-
-    reaction.message.edit(newMessageContent);
-
+function isValidUser (user) {
+    return !user.bot
 }
 
-client.on("messageReactionAdd", (reaction, user) => {
-    //editMessage(reaction, user);
-    addTrainer(reaction, user)
-});
+function isValidReaction (reaction) {
+    // Message is not from MunchBot
+    if (reaction.message.author.id !== client.user.id) {
+        return false
+    }
+    // Reaction is not from our own list
+    if (!reaction_numbers.includes(reaction.emoji.name)) {
+        return false
+    }
+    return true
+}
 
-client.on("messageReactionRemove", (reaction, user) => {
-    //editMessage(reaction, user);
-    removeTrainer(reaction, user)
-});
+client.on('messageReactionAdd', (reaction, user) => {
+    if (isValidUser(user) && isValidReaction(reaction)) {
+        addTrainerToRaid(reaction, user)
+    }
+})
+
+client.on('messageReactionRemove', (reaction, user) => {
+    if (isValidUser(user) && isValidReaction(reaction)) {
+        removeTrainerFromRaid(reaction, user)
+    }
+})
 
 client.login(auth.token);
