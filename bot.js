@@ -56,7 +56,7 @@ client.on("message", (message) => {
 function editMessage(reaction, user) {
 
 	if(user.bot) return;
-        if(reaction.message.author.id !== "437713794576285696") return;
+        if(reaction.message.author.id !== client.user.id) return;
 
         let newMessageContent = "";
         let msgParts = reaction.message.content.split("Ilmoittautuneet:");
