@@ -24,7 +24,7 @@ client.on("message", (message) => {
         	const command = args.shift().toLowerCase();
 
 		// Creating a raid
-		if(command === "tr"){
+		if(command === "r"){
 	                const boss = args[0];
        	        	const time = args[1];
                 	let gym = "";
@@ -47,9 +47,10 @@ client.on("message", (message) => {
         	        message.channel.send("pong!`" + (new Date().getTime() - message.createdTimestamp) + "ms`");
         	}
 
-        if (command === "info") {
-            message.channel.send("Munchbot uptime " + dateDifference(startTime, new Date()));
-        }
+		// General info!
+        	if (command === "info") {
+        		message.channel.send("Munchbot uptime " + dateDifference(startTime, new Date()));
+        	}
 	}
 });
 
