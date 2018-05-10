@@ -6,6 +6,7 @@ const parsers = require('./parsers.js')
 
 // Reaction numbers as Unicode, reacting with them normally doesn't work
 var reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
+//var reaction_numbers = ["not coming", "coming", "coming with 1 friend", "coming with 2 friends", "coming with 3 friends", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
 const startTime = new Date();
 
 client.on("ready", () => {
@@ -55,13 +56,8 @@ function addTrainerToRaid (reaction, user) {
 
     let raid = parsers.messageToRaid(reaction.message)
     let trainerWithFriends = getNick(reaction, user)
-    console.log('-----------------------')
-    console.log(raid)
     raid.trainers = removePreviousRegistrations(user.username, raid.trainers)
-    console.log(raid)
     raid.trainers.push(trainerWithFriends)
-    console.log(raid)
-    console.log('-----------------------')
 
     let message = parsers.raidToMessage(raid)
 
