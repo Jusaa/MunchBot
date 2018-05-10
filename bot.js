@@ -36,6 +36,7 @@ client.on("message", (message) => {
             });
             message.channel.send(msg)
                 .then(function (message) {
+                    message.react(/* "438598806825861131" */ reaction_numbers[0]);
                     message.react(/* "438598806825861131" */ reaction_numbers[1]);
                     message.react(/* "438599265283997706" */ reaction_numbers[2]);
                     message.react(/* "438599716863868928" */ reaction_numbers[3]);
@@ -53,9 +54,14 @@ client.on("message", (message) => {
 function addTrainerToRaid (reaction, user) {
 
     let raid = parsers.messageToRaid(reaction.message)
-    let trainer = getNick(reaction, user)
-
-    raid.trainers.push(trainer)
+    let trainerWithFriends = getNick(reaction, user)
+    console.log('-----------------------')
+    console.log(raid)
+    raid.trainers = removePreviousRegistrations(user.username, raid.trainers)
+    console.log(raid)
+    raid.trainers.push(trainerWithFriends)
+    console.log(raid)
+    console.log('-----------------------')
 
     let message = parsers.raidToMessage(raid)
 
@@ -66,14 +72,26 @@ function addTrainerToRaid (reaction, user) {
 function removeTrainerFromRaid (reaction, user) {
 
     let raid = parsers.messageToRaid(reaction.message)
-    let trainer = getNick(reaction, user)
+    //let trainer = getNick(reaction, user)
 
-    raid.trainers.splice(raid.trainers.indexOf(trainer), 1)
+    //raid.trainers.splice(raid.trainers.indexOf(trainer), 1)
+    raid.trainers = removePreviousRegistrations(user.username, raid.trainers)
 
     let message = parsers.raidToMessage(raid)
 
     reaction.message.edit(message)
 
+}
+
+function removePreviousRegistrations(username, trainers) {
+    let filteredList = trainers.filter(trainer => !(trainer === username || trainer.startsWith(username + ' +')))
+    return filteredList
+
+    if (filteredList.length === 0) {
+        return [parsers.NO_TRAINERS]
+    } else {
+        return filteredList
+    }
 }
 
 function getCount (reaction) {
@@ -109,13 +127,17 @@ function isValidReaction (reaction) {
 
 client.on('messageReactionAdd', (reaction, user) => {
     if (isValidUser(user) && isValidReaction(reaction)) {
-        addTrainerToRaid(reaction, user)
+        if (getCount(reaction) === 0) {
+            removeTrainerFromRaid(reaction, user)
+        } else {
+            addTrainerToRaid(reaction, user)
+        }
     }
 })
 
 client.on('messageReactionRemove', (reaction, user) => {
     if (isValidUser(user) && isValidReaction(reaction)) {
-        removeTrainerFromRaid(reaction, user)
+        //removeTrainerFromRaid(reaction, user)
     }
 })
 
