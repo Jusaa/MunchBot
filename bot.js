@@ -1,21 +1,25 @@
-const Discord = require("discord.js");
-const auth = require("./auth.json");
-const dateDifference = require("date-difference");
-const client = new Discord.Client();
+const Discord = require('discord.js')
+const auth = require('./auth.json')
+const dateDifference = require('date-difference')
+const client = new Discord.Client()
 const parsers = require('./parsers.js')
+const config = require('./config.json')
+const fs = require('fs')
 
 // Reaction numbers as Unicode, reacting with them normally doesn't work
-var reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
-//var reaction_numbers = ["not coming", "coming", "coming with 1 friend", "coming with 2 friends", "coming with 3 friends", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
+const reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
 const startTime = new Date();
 
-client.on("ready", () => {
-    console.log("I am ready!");
-    client.user.setUsername("MunchBot");
+const helpText = fs.readFileSync('help.md', 'utf8')
+console.log(helpText)
+
+client.on('ready', () => {
+    client.user.setUsername(config.botName);
+    console.log(config.botName + ' is ready');
 });
 
 // Triggered when message is sent in server
-client.on("message", (message) => {
+client.on('message', (message) => {
 
     // Prevent loop from bots own messages
     if (message.author.bot) return;
@@ -25,45 +29,58 @@ client.on("message", (message) => {
 
         let command = parsers.parseCommand(message.content)
 
-        console.log('MunchBot received command: ' + command)
+        console.log('Bot received command: ' + command)
 
-        // Creating a raid
-        if (command === "tr") {
+        switch (command) {
 
-            let raid = parsers.parseRaid(message.content)
-            let msg = parsers.raidToMessage(raid)
+            // Creating a raid
+            case 'tr':
 
-            message.delete()
-                .catch((e) => {
-                    console.log(e)
-                })
-            message.channel.send(msg)
-                .then((message) => {
-                    return message.react(reaction_numbers[0])
-                })
-                .then((reaction) => {
-                    return reaction.message.react(reaction_numbers[1])
-                })
-                .then((reaction) => {
-                    return reaction.message.react(reaction_numbers[2])
-                })
-                .then((reaction) => {
-                    return reaction.message.react(reaction_numbers[3])
-                })
-                .catch((e) => {
-                    console.error(e)
-                })
+                let raid = parsers.parseRaid(message.content)
+                let msg = parsers.raidToMessage(raid)
 
-        }
+                message.delete()
+                    .catch((e) => {
+                        console.log(e)
+                    })
+                message.channel.send(msg)
+                    .then((message) => {
+                        return message.react(reaction_numbers[0])
+                    })
+                    .then((reaction) => {
+                        return reaction.message.react(reaction_numbers[1])
+                    })
+                    .then((reaction) => {
+                        return reaction.message.react(reaction_numbers[2])
+                    })
+                    .then((reaction) => {
+                        return reaction.message.react(reaction_numbers[3])
+                    })
+                    .catch((e) => {
+                        console.error(e)
+                    })
 
-        // PingPong!
-        if (command === "ping") {
-            message.channel.send("pong!`" + (new Date().getTime() - message.createdTimestamp) + "ms`");
+                break
+
+            // PingPong!
+            case 'ping':
+                message.channel.send('pong! `' + (new Date().getTime() - message.createdTimestamp) + ' ms`')
+                break
+
+            case 'i':
+            case 'info':
+                message.channel.send(config.botName + ' uptime: ' + dateDifference(startTime, new Date()))
+                break
+
+            case 'h':
+            case 'help':
+                message.channel.send(helpText)
+                break
         }
     }
 });
 
-function addTrainerToRaid (reaction, user) {
+function addTrainerToRaid(reaction, user) {
 
     let raid = parsers.messageToRaid(reaction.message)
     let trainerWithFriends = getNick(reaction, user)
@@ -76,7 +93,7 @@ function addTrainerToRaid (reaction, user) {
 
 }
 
-function removeTrainerFromRaid (reaction, user) {
+function removeTrainerFromRaid(reaction, user) {
 
     let raid = parsers.messageToRaid(reaction.message)
     //let trainer = getNick(reaction, user)
@@ -101,12 +118,12 @@ function removePreviousRegistrations(username, trainers) {
     }
 }
 
-function getCount (reaction) {
+function getCount(reaction) {
     return (reaction_numbers.indexOf(reaction.emoji.name))
 }
 
 // Displays trainer name and possible friends in "+2" style
-function getNick (reaction, user) {
+function getNick(reaction, user) {
 
     let trainer = user.username
     const friends = getCount(reaction) - 1 // user is included in the count
@@ -116,11 +133,11 @@ function getNick (reaction, user) {
     return trainer
 }
 
-function isValidUser (user) {
+function isValidUser(user) {
     return !user.bot
 }
 
-function isValidReaction (reaction) {
+function isValidReaction(reaction) {
     // Message is not from MunchBot
     if (reaction.message.author.id !== client.user.id) {
         return false
