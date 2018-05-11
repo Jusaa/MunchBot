@@ -82,12 +82,12 @@ client.on('message', (message) => {
 
 function addTrainerToRaid(reaction, user) {
 
-    let raid = parsers.messageToRaid(reaction.message)
+    let raid = parsers.embedMessageToRaid(reaction.message)
     let trainerWithFriends = getNick(reaction, user)
     raid.trainers = removePreviousRegistrations(user.username, raid.trainers)
     raid.trainers.push(trainerWithFriends)
 
-    let message = parsers.raidToMessage(raid)
+    let message = parsers.raidToEmbedMessage(raid)
 
     reaction.message.edit(message)
 
@@ -95,13 +95,13 @@ function addTrainerToRaid(reaction, user) {
 
 function removeTrainerFromRaid(reaction, user) {
 
-    let raid = parsers.messageToRaid(reaction.message)
+    let raid = parsers.embedMessageToRaid(reaction.message)
     //let trainer = getNick(reaction, user)
 
     //raid.trainers.splice(raid.trainers.indexOf(trainer), 1)
     raid.trainers = removePreviousRegistrations(user.username, raid.trainers)
 
-    let message = parsers.raidToMessage(raid)
+    let message = parsers.raidToEmbedMessage(raid)
 
     reaction.message.edit(message)
 

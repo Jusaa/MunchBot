@@ -1,3 +1,4 @@
+const Discord = require('discord.js')
 const utils = require('./utils.js')
 const strsplit = require('strsplit')
 const TRAINER_SEPARATOR = '\n'
@@ -32,6 +33,7 @@ function parseRaid(commandLine) {
 }
 
 function messageToRaid(message) {
+
     let body = message.content
     let boss = utils.extractBetween(body, 'Boss: ', '\n')
     let time = utils.extractBetween(body, 'Time: ', '\n')
@@ -58,6 +60,41 @@ function raidToMessage(raid) {
     return msg
 }
 
+function raidToEmbedMessage(raid) {
+    const embed = new Discord.RichEmbed()
+        .setAuthor(raid.boss)
+        .setTitle(raid.time)
+        .setColor('#009999')
+        .setDescription(raid.gym)
+        .addField('Trainers', formatTrainerList(raid.trainers))
+        .addField('Total', calculateTotal(raid.trainers))
+
+    return {embed}
+}
+
+function embedMessageToRaid(message) {
+    //console.log(message)
+    let embed = message.embeds[0]
+
+    let boss = embed.author.name
+    let time = embed.title
+    let location = embed.description
+    let trainers = ''
+
+    embed.fields.forEach((field) => {
+        if (field.name === 'Trainers') {
+            trainers = field.value
+        }
+    })
+
+    return {
+        boss: boss,
+        time: time,
+        gym: location,
+        trainers: trainers.split(TRAINER_SEPARATOR)
+    }
+}
+
 function formatTrainerList(trainers) {
     if (trainers.length === 0) {
         return NO_TRAINERS
@@ -77,7 +114,7 @@ function calculateTotal(trainers) {
     return trainers
         .filter(trainer => trainer !== NO_TRAINERS)
         .reduce((total, trainer) => {
-            if (trainer.substr(trainer.length - 2, 1) === '+') {
+            if (trainer.substr(trainer.length - 3, 2) === ' +') {
                 return total + 1 + parseInt(trainer.substr(trainer.length - 1), 10)
             } else {
                 return total + 1
@@ -85,4 +122,4 @@ function calculateTotal(trainers) {
         }, 0)
 }
 
-module.exports = {NO_TRAINERS, parseCommand, parseRaid, messageToRaid, raidToMessage, calculateTotal}
+module.exports = {NO_TRAINERS, parseCommand, parseRaid, messageToRaid, raidToMessage, calculateTotal, embedMessageToRaid, raidToEmbedMessage}
