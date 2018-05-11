@@ -1,6 +1,6 @@
 const utils = require('./utils.js')
 const strsplit = require('strsplit')
-const TRAINER_SEPARATOR = ', '
+const TRAINER_SEPARATOR = '\n'
 const NO_TRAINERS = 'none'
 
 function parseCommand(commandLine) {
@@ -36,7 +36,7 @@ function messageToRaid(message) {
     let boss = utils.extractBetween(body, 'Boss: ', '\n')
     let time = utils.extractBetween(body, 'Time: ', '\n')
     let location = utils.extractBetween(body, 'Location: ', '\n')
-    let trainers = utils.extractBetween(body, 'Trainers: ', '\n')
+    let trainers = utils.extractBetween(body, 'Trainers: ', '\n' + 'TOTAL:')
     return {
         boss: boss,
         time: time,
@@ -46,10 +46,12 @@ function messageToRaid(message) {
 }
 
 function raidToMessage(raid) {
+    console.log(raid)
     msg = '```' +
         'Boss: ' + raid.boss + '\n' +
         'Time: ' + raid.time + '\n' +
         'Location: ' + raid.gym + '\n' +
+        '------------\n' +
         'Trainers: ' + formatTrainerList(raid.trainers) + '\n' +
         'TOTAL: ' + calculateTotal(raid.trainers) + '\n' +
         '```'
@@ -57,7 +59,13 @@ function raidToMessage(raid) {
 }
 
 function formatTrainerList(trainers) {
-    if (trainers.length == 0) {
+    if (trainers.length === 0) {
+        return NO_TRAINERS
+    }
+    if (trainers.length === 1 && trainers[0] === '') { //TODO bugfix?
+        return NO_TRAINERS
+    }
+    if (trainers.length === 1 && trainers[0] === NO_TRAINERS) {
         return NO_TRAINERS
     }
     return trainers.filter(trainer => trainer !== NO_TRAINERS)
@@ -75,7 +83,6 @@ function calculateTotal(trainers) {
                 return total + 1
             }
         }, 0)
-
 }
 
-module.exports = {parseCommand, parseRaid, messageToRaid, raidToMessage, calculateTotal}
+module.exports = {NO_TRAINERS, parseCommand, parseRaid, messageToRaid, raidToMessage, calculateTotal}
