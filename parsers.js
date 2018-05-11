@@ -77,7 +77,7 @@ function calculateTotal(trainers) {
     return trainers
         .filter(trainer => trainer !== NO_TRAINERS)
         .reduce((total, trainer) => {
-            if (trainer.substr(trainer.length - 2, 1) === '+') {
+            if (trainer.substr(trainer.length - 3, 2) === ' +') {
                 return total + 1 + parseInt(trainer.substr(trainer.length - 1), 10)
             } else {
                 return total + 1
