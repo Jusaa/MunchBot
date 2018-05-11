@@ -46,6 +46,7 @@ function messageToRaid(message) {
 }
 
 function raidToMessage(raid) {
+    console.log(raid)
     msg = '```' +
         'Boss: ' + raid.boss + '\n' +
         'Time: ' + raid.time + '\n' +
@@ -58,7 +59,13 @@ function raidToMessage(raid) {
 }
 
 function formatTrainerList(trainers) {
-    if (trainers.length == 0) {
+    if (trainers.length === 0) {
+        return NO_TRAINERS
+    }
+    if (trainers.length === 1 && trainers[0] === '') { //TODO bugfix?
+        return NO_TRAINERS
+    }
+    if (trainers.length === 1 && trainers[0] === NO_TRAINERS) {
         return NO_TRAINERS
     }
     return trainers.filter(trainer => trainer !== NO_TRAINERS)
@@ -76,7 +83,6 @@ function calculateTotal(trainers) {
                 return total + 1
             }
         }, 0)
-
 }
 
-module.exports = {parseCommand, parseRaid, messageToRaid, raidToMessage, calculateTotal}
+module.exports = {NO_TRAINERS, parseCommand, parseRaid, messageToRaid, raidToMessage, calculateTotal}
