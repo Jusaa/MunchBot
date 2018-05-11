@@ -1,6 +1,6 @@
 const utils = require('./utils.js')
 const strsplit = require('strsplit')
-const TRAINER_SEPARATOR = ', '
+const TRAINER_SEPARATOR = '\n'
 const NO_TRAINERS = 'none'
 
 function parseCommand(commandLine) {
@@ -36,7 +36,7 @@ function messageToRaid(message) {
     let boss = utils.extractBetween(body, 'Boss: ', '\n')
     let time = utils.extractBetween(body, 'Time: ', '\n')
     let location = utils.extractBetween(body, 'Location: ', '\n')
-    let trainers = utils.extractBetween(body, 'Trainers: ', '\n')
+    let trainers = utils.extractBetween(body, 'Trainers: ', '\n' + 'TOTAL:')
     return {
         boss: boss,
         time: time,
@@ -50,6 +50,7 @@ function raidToMessage(raid) {
         'Boss: ' + raid.boss + '\n' +
         'Time: ' + raid.time + '\n' +
         'Location: ' + raid.gym + '\n' +
+        '------------\n' +
         'Trainers: ' + formatTrainerList(raid.trainers) + '\n' +
         'TOTAL: ' + calculateTotal(raid.trainers) + '\n' +
         '```'
