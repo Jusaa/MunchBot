@@ -32,14 +32,26 @@ client.on("message", (message) => {
             let raid = parsers.parseRaid(message.content)
             let msg = parsers.raidToMessage(raid)
 
-            message.delete().catch(O_o=> {
-            });
+            message.delete()
+                .catch((e) => {
+                    console.log(e)
+                })
             message.channel.send(msg)
-                .then(function (message) {
-                    message.react(/* "438598806825861131" */ reaction_numbers[1]);
-                    message.react(/* "438599265283997706" */ reaction_numbers[2]);
-                    message.react(/* "438599716863868928" */ reaction_numbers[3]);
-                });
+                .then((message) => {
+                    return message.react(reaction_numbers[0])
+                })
+                .then((reaction) => {
+                    return reaction.message.react(reaction_numbers[1])
+                })
+                .then((reaction) => {
+                    return reaction.message.react(reaction_numbers[2])
+                })
+                .then((reaction) => {
+                    return reaction.message.react(reaction_numbers[3])
+                })
+                .catch((e) => {
+                    console.error(e)
+                })
 
         }
 
