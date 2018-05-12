@@ -1,6 +1,7 @@
 const Discord = require('discord.js')
 const utils = require('./utils.js')
 const strsplit = require('strsplit')
+const bot = require('./bot.js')
 const TRAINER_SEPARATOR = '\n'
 const NO_TRAINERS = 'none'
 
@@ -38,12 +39,12 @@ function messageToRaid(message) {
     let boss = utils.extractBetween(body, 'Boss: ', '\n')
     let time = utils.extractBetween(body, 'Time: ', '\n')
     let location = utils.extractBetween(body, 'Location: ', '\n')
-    let trainers = utils.extractBetween(body, 'Trainers: ', '\n' + 'TOTAL:')
+    let trainers = getTrainersByReaction(message)
     return {
         boss: boss,
         time: time,
         gym: location,
-        trainers: trainers.split(TRAINER_SEPARATOR)
+        trainers: trainers
     }
 }
 
@@ -73,25 +74,56 @@ function raidToEmbedMessage(raid) {
 }
 
 function embedMessageToRaid(message) {
-    //console.log(message)
+
     let embed = message.embeds[0]
 
     let boss = embed.author.name
     let time = embed.title
     let location = embed.description
-    let trainers = ''
-
-    embed.fields.forEach((field) => {
-        if (field.name === 'Trainers') {
-            trainers = field.value
-        }
-    })
+    let trainers = getTrainersByReaction(message)
 
     return {
         boss: boss,
         time: time,
         gym: location,
-        trainers: trainers.split(TRAINER_SEPARATOR)
+        trainers: trainers
+    }
+}
+
+function getTrainersByReaction(message) {
+
+    try {
+        console.log('--------------')
+        let trainersMap = new Map()
+        message.reactions.forEach((emoji) => {
+            let peopleToAdd = bot.getPeopleCount(emoji)
+            emoji.users.forEach((user, userId) => {
+                if (userId !== bot.getBotId()) {
+
+                    let trainer = user.username
+
+                    if (trainersMap.has(trainer)) {
+                        let oldPeople = trainersMap.get(trainer)
+                        trainersMap.set(trainer, oldPeople + peopleToAdd)
+                    } else {
+                        trainersMap.set(trainer, peopleToAdd)
+                    }
+
+                }
+            })
+        })
+
+        let trainersArray = []
+        trainersMap.forEach((value, key) => {
+            if (value === 1) {
+                trainersArray.push(key)
+            } else {
+                trainersArray.push(key + ' +' + (value - 1))
+            }
+        })
+        return trainersArray
+    } catch (e) {
+        console.error(e)
     }
 }
 
