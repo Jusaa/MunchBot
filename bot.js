@@ -9,7 +9,8 @@ let BOT_ID
 let BOT_NAME
 
 // Reaction numbers as Unicode, reacting with them normally doesn't work
-const reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
+//const reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
+const reaction_numbers = ["Nolla", "1_:438598806825861131", "2_:438599265283997706", "3_:438599716863868928"];
 const startTime = new Date();
 
 const helpText = fs.readFileSync('help.md', 'utf8')
@@ -37,7 +38,7 @@ client.on('message', (message) => {
         switch (command) {
 
             // Creating a raid
-            case 'tr':
+            case 'r':
 
                 let raid = parsers.parseRaid(message.content)
                 let msg = parsers.raidToEmbedMessage(raid)
@@ -104,7 +105,7 @@ function removePreviousRegistrations(username, trainers) {
 }
 
 exports.getPeopleCount = getPeopleCount = (reaction) => {
-    return (reaction_numbers.indexOf(reaction.emoji.name))
+    return (reaction_numbers.indexOf(reaction.emoji.name + ":" + reaction.emoji.id))
 }
 
 // Displays trainer name and possible friends in "+2" style
@@ -128,7 +129,7 @@ function isValidReaction(reaction) {
         return false
     }
     // Reaction is not from our own list
-    if (!reaction_numbers.includes(reaction.emoji.name)) {
+    if (!reaction_numbers.includes(reaction.emoji.name + ":" + reaction.emoji.id)) {
         return false
     }
     return true
