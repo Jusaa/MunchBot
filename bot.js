@@ -10,7 +10,12 @@ let BOT_NAME
 
 // Reaction numbers as Unicode, reacting with them normally doesn't work
 //const reaction_numbers = ["\u0030\u20E3", "\u0031\u20E3", "\u0032\u20E3", "\u0033\u20E3", "\u0034\u20E3", "\u0035\u20E3", "\u0036\u20E3", "\u0037\u20E3", "\u0038\u20E3", "\u0039\u20E3"];
-const reaction_numbers = ["Nolla", "1_:438598806825861131", "2_:438599265283997706", "3_:438599716863868928"];
+
+// Old all black numbers
+//const reaction_numbers = ["Nolla", "1_:438598806825861131", "2_:438599265283997706", "3_:438599716863868928"];
+
+const reaction_numbers = ["Nolla", "1_:463424012194938900", "2_:463424047817162763", "3_:463424065080786944"];
+
 const startTime = new Date();
 
 const helpText = fs.readFileSync('help.md', 'utf8')
@@ -35,13 +40,16 @@ client.on('message', (message) => {
 
         console.log('Bot received command: ' + command)
 
+	let raid
+	let msg
+
         switch (command) {
 
             // Creating a raid
             case 'r':
 
-                let raid = parsers.parseRaid(message.content)
-                let msg = parsers.raidToEmbedMessage(raid)
+                raid = parsers.parseRaid(message.content)
+                msg = parsers.raidToEmbedMessage(raid)
 
                 message.delete()
                     .catch((e) => {
@@ -57,6 +65,34 @@ client.on('message', (message) => {
                     .then((reaction) => {
                         return reaction.message.react(reaction_numbers[3])
                     })
+                    .catch((e) => {
+                        console.error(e)
+                    })
+
+                break
+
+	    case 'xr':
+
+                raid = parsers.parseRaid(message.content)
+                msg = parsers.raidToEmbedMessage(raid)
+
+                message.delete()
+                    .catch((e) => {
+                        console.log(e)
+                    })
+                message.channel.send(msg)
+                    .then((message) => {
+                        return message.react(reaction_numbers[1])
+                    })
+                    .then((reaction) => {
+                        return reaction.message.react(reaction_numbers[2])
+                    })
+                    .then((reaction) => {
+                        return reaction.message.react(reaction_numbers[3])
+                    })
+		    .then((reaction) => {
+			return reaction.message.pin()
+		    })
                     .catch((e) => {
                         console.error(e)
                     })
