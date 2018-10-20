@@ -18,18 +18,20 @@ function parseCommand(commandLine) {
     return commandLine.substr(1, commandLine.indexOf(' ') - 1)
 }
 
-function parseRaid(commandLine) {
+function parseRaid(commandLine, channelName) {
     // format is: <command> <boss> <time> <gym>
     // gym name may contain spaces
     let parts = strsplit(commandLine, ' ', 4)
     if (parts.length < 4) {
         throw('invalid raid format')
     }
+    let channel = "@" + channelName
     return {
         boss: parts[1],
         time: parts[2],
         gym: parts[3],
-        trainers: []
+        trainers: [],
+        channel: channel
     }
 }
 
@@ -67,6 +69,7 @@ function raidToEmbedMessage(raid) {
         .setTitle(raid.time)
         .setColor('#009999')
         .setDescription(raid.gym)
+        .setFooter(raid.channel)
         .addField('Trainers', formatTrainerList(raid.trainers))
         .addField('Total', calculateTotal(raid.trainers))
 
@@ -81,12 +84,14 @@ function embedMessageToRaid(message) {
     let time = embed.title
     let location = embed.description
     let trainers = getTrainersByReaction(message)
+    let channel = embed.footer.text
 
     return {
         boss: boss,
         time: time,
         gym: location,
-        trainers: trainers
+        trainers: trainers,
+        channel: channel
     }
 }
 
