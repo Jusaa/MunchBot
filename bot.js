@@ -48,7 +48,7 @@ client.on('message', (message) => {
             // Creating a raid
             case 'r':
 
-                raid = parsers.parseRaid(message.content)
+                raid = parsers.parseRaid(message.content, message.channel.name)
                 msg = parsers.raidToEmbedMessage(raid)
 
                 message.delete()
@@ -73,7 +73,7 @@ client.on('message', (message) => {
 
 	    case 'xr':
 
-                raid = parsers.parseRaid(message.content)
+                raid = parsers.parseRaid(message.content, message.channel.name)
                 msg = parsers.raidToEmbedMessage(raid)
 
                 message.delete()
